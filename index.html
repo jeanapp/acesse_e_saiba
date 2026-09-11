@@ -3,50 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trello Realtime Avançado</title>
+  <title>Trello Realtime - Drag & Drop</title>
   <style>
     * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    body { background-color: #0079bf; color: #333; padding: 20px; }
+    body { background-color: #0079bf; color: #333; padding: 15px; }
     
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white; }
-    h1 { font-size: 1.8em; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: white; }
+    h1 { font-size: 1.5em; }
     
-    .add-column-bar { display: flex; gap: 10px; }
-    .add-column-bar input { padding: 8px; border-radius: 4px; border: none; outline: none; }
-    .add-column-bar button { background: #5aac44; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .add-column-bar { display: flex; gap: 8px; }
+    .add-column-bar input { padding: 6px 10px; border-radius: 4px; border: none; outline: none; font-size: 0.9em; }
+    .add-column-bar button { background: #5aac44; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
     .add-column-bar button:hover { background: #519839; }
 
-    /* Layout do Quadro */
-    .board { display: flex; gap: 20px; overflow-x: auto; align-items: flex-start; padding-bottom: 20px; min-height: 80vh; }
-    .list { background: #ebecf0; border-radius: 8px; width: 320px; min-width: 320px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); flex-shrink: 0; }
-    .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .list-title { font-weight: bold; font-size: 1.1em; color: #172b4d; }
-    .btn-archive-col { background: transparent; border: none; color: #6b778c; cursor: pointer; font-size: 0.85em; text-decoration: underline; }
+    /* Layout do Quadro e Colunas Mais Estreitas */
+    .board { display: flex; gap: 12px; overflow-x: auto; align-items: flex-start; padding-bottom: 15px; min-height: 85vh; }
+    .list { background: #ebecf0; border-radius: 6px; width: 240px; min-width: 240px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); flex-shrink: 0; }
+    .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px; }
+    .list-title { font-weight: bold; font-size: 0.95em; color: #172b4d; }
+    .btn-archive-col { background: transparent; border: none; color: #6b778c; cursor: pointer; font-size: 0.75em; text-decoration: underline; }
     .btn-archive-col:hover { color: #eb5a46; }
 
-    /* Cards */
-    .cards-container { min-height: 20px; }
-    .card { background: white; border-radius: 5px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-    .card-title { font-weight: bold; margin-bottom: 6px; color: #172b4d; }
-    .card-desc { font-size: 0.9em; color: #5e6c84; margin-bottom: 8px; white-space: pre-wrap; }
-    
-    /* Anexos */
-    .card-attachment { margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; }
-    .card-attachment img { max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px; display: block; margin-top: 5px; }
-    .card-attachment a { color: #0052cc; font-size: 0.85em; text-decoration: underline; word-break: break-all; font-weight: bold; display: inline-block; margin-top: 4px; }
+    /* Container de Soltar Cards */
+    .cards-container { min-height: 40px; padding-bottom: 5px; }
+    .cards-container.drag-over { background: rgba(9, 30, 66, 0.08); border-radius: 4px; }
 
-    /* Ações do Card */
-    .card-controls { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 5px; border-top: 1px solid #f4f5f7; padding-top: 8px; }
-    .card-controls select { padding: 4px; border-radius: 3px; border: 1px solid #ccc; font-size: 0.8em; background: #fff; }
-    .btn-delete { background: #eb5a46; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.8em; font-weight: bold; }
+    /* Cartões Menores e Compactos */
+    .card { background: white; border-radius: 4px; padding: 8px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); cursor: grab; position: relative; }
+    .card:active { cursor: grabbing; opacity: 0.6; }
+    .card-title { font-weight: bold; margin-bottom: 4px; color: #172b4d; font-size: 0.88em; }
+    .card-desc { font-size: 0.8em; color: #5e6c84; margin-bottom: 6px; white-space: pre-wrap; line-height: 1.2; }
+    
+    /* Anexos Compactos */
+    .card-attachment { margin-top: 6px; border-top: 1px solid #eee; padding-top: 4px; }
+    .card-attachment img { max-width: 100%; max-height: 120px; object-fit: cover; border-radius: 3px; display: block; margin-top: 4px; }
+    .card-attachment a { color: #0052cc; font-size: 0.75em; text-decoration: underline; word-break: break-all; font-weight: bold; display: inline-block; }
+
+    /* Controles do Card */
+    .card-controls { margin-top: 6px; display: flex; justify-content: flex-end; }
+    .btn-delete { background: #eb5a46; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7em; font-weight: bold; }
     .btn-delete:hover { background: #cf513d; }
 
-    /* Formulário */
-    .add-card-form { margin-top: 12px; background: #fafbfc; padding: 10px; border-radius: 5px; border: 1px solid #dfe1e6; }
-    .add-card-form input[type="text"], .add-card-form textarea { width: 100%; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.9em; }
-    .add-card-form textarea { resize: vertical; min-height: 40px; }
-    .add-card-form input[type="file"] { margin-bottom: 8px; font-size: 0.8em; width: 100%; }
-    .add-card-form button { background: #0079bf; color: white; border: none; padding: 8px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; width: 100%; font-size: 0.9em; }
+    /* Formulário Mais Compacto */
+    .add-card-form { margin-top: 8px; background: #fafbfc; padding: 6px; border-radius: 4px; border: 1px solid #dfe1e6; }
+    .add-card-form input[type="text"], .add-card-form textarea { width: 100%; margin-bottom: 6px; padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8em; }
+    .add-card-form textarea { resize: vertical; min-height: 32px; }
+    .add-card-form input[type="file"] { margin-bottom: 6px; font-size: 0.7em; width: 100%; }
+    .add-card-form button { background: #0079bf; color: white; border: none; padding: 6px; border-radius: 3px; cursor: pointer; font-weight: bold; width: 100%; font-size: 0.8em; }
     .add-card-form button:hover { background: #026aa7; }
   </style>
 
@@ -72,20 +75,18 @@
     let currentColumns = [];
     let currentCards = [];
 
-    // Escuta Colunas em Tempo Real
+    // Escuta Colunas
     const qColumns = query(columnsColl, orderBy("createdAt", "asc"));
     onSnapshot(qColumns, (snapshot) => {
       currentColumns = [];
       snapshot.forEach(docSnap => {
         const col = docSnap.data();
-        if (!col.archived) {
-          currentColumns.push({ id: docSnap.id, ...col });
-        }
+        if (!col.archived) currentColumns.push({ id: docSnap.id, ...col });
       });
       renderBoard();
     });
 
-    // Escuta Cards em Tempo Real
+    // Escuta Cards
     onSnapshot(cardsColl, (snapshot) => {
       currentCards = [];
       snapshot.forEach(docSnap => {
@@ -94,7 +95,6 @@
       renderBoard();
     });
 
-    // Converter arquivos para Base64 (Armazenamento direto no Firestore)
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -104,7 +104,7 @@
       });
     }
 
-    // Renderizar o Quadro Inteiro
+    // Renderiza o Quadro com Drag & Drop
     function renderBoard() {
       const boardEl = document.getElementById("board");
       boardEl.innerHTML = "";
@@ -113,7 +113,6 @@
         const colEl = document.createElement("div");
         colEl.className = "list";
 
-        // Filtra cards da coluna
         const colCards = currentCards.filter(c => c.columnId === column.id);
 
         let cardsHTML = colCards.map(card => {
@@ -122,25 +121,16 @@
             if (card.fileType && card.fileType.startsWith("image/")) {
               attachmentHTML = `<div class="card-attachment"><img src="${card.fileData}" alt="Imagem"></div>`;
             } else {
-              attachmentHTML = `<div class="card-attachment"><a href="${card.fileData}" download="${card.fileName || 'anexo'}" target="_blank">📄 ${escapeHtml(card.fileName || 'Baixar Arquivo/PDF')}</a></div>`;
+              attachmentHTML = `<div class="card-attachment"><a href="${card.fileData}" download="${card.fileName || 'anexo'}" target="_blank">📄 ${escapeHtml(card.fileName || 'Abrir Anexo')}</a></div>`;
             }
           }
 
-          // Seletor para mover de coluna
-          let moveOptions = currentColumns.map(c => 
-            `<option value="${c.id}" ${c.id === column.id ? 'selected disabled' : ''}>Mover para: ${escapeHtml(c.title)}</option>`
-          ).join('');
-
           return `
-            <div class="card">
+            <div class="card" draggable="true" ondragstart="window.onDragStart(event, '${card.id}')">
               <div class="card-title">${escapeHtml(card.title)}</div>
               ${card.description ? `<div class="card-desc">${escapeHtml(card.description)}</div>` : ''}
               ${attachmentHTML}
               <div class="card-controls">
-                <select onchange="window.moveCard('${card.id}', this.value)">
-                  <option value="" disabled selected>Mover para...</option>
-                  ${moveOptions}
-                </select>
                 <button class="btn-delete" onclick="window.deleteCard('${card.id}')">Excluir</button>
               </div>
             </div>
@@ -152,10 +142,15 @@
             <span class="list-title">${escapeHtml(column.title)}</span>
             <button class="btn-archive-col" onclick="window.archiveColumn('${column.id}')">Arquivar</button>
           </div>
-          <div class="cards-container">${cardsHTML}</div>
+          <div class="cards-container" 
+               ondragover="window.onDragOver(event)" 
+               ondragleave="window.onDragLeave(event)" 
+               ondrop="window.onDrop(event, '${column.id}')">
+            ${cardsHTML}
+          </div>
           <div class="add-card-form">
-            <input type="text" id="title-${column.id}" placeholder="Título da tarefa...">
-            <textarea id="desc-${column.id}" placeholder="Descrição (opcional)..."></textarea>
+            <input type="text" id="title-${column.id}" placeholder="Título...">
+            <textarea id="desc-${column.id}" placeholder="Descrição..."></textarea>
             <input type="file" id="file-${column.id}">
             <button onclick="window.addCard('${column.id}')">+ Adicionar Card</button>
           </div>
@@ -165,11 +160,34 @@
       });
     }
 
-    // Ação: Criar Coluna
+    // Funções de Arrastar e Soltar (Drag and Drop)
+    window.onDragStart = function (e, cardId) {
+      e.dataTransfer.setData("text/plain", cardId);
+    };
+
+    window.onDragOver = function (e) {
+      e.preventDefault();
+      e.currentTarget.classList.add("drag-over");
+    };
+
+    window.onDragLeave = function (e) {
+      e.currentTarget.classList.remove("drag-over");
+    };
+
+    window.onDrop = async function (e, targetColumnId) {
+      e.preventDefault();
+      e.currentTarget.classList.remove("drag-over");
+      const cardId = e.dataTransfer.getData("text/plain");
+      if (cardId) {
+        await updateDoc(doc(db, "cards", cardId), { columnId: targetColumnId });
+      }
+    };
+
+    // Ações
     window.addColumn = async function () {
       const input = document.getElementById("new-column-title");
       const title = input.value.trim();
-      if (!title) return alert("Digite o nome da coluna.");
+      if (!title) return;
 
       await addDoc(columnsColl, {
         title: title,
@@ -180,14 +198,12 @@
       input.value = "";
     };
 
-    // Ação: Arquivar Coluna
     window.archiveColumn = async function (colId) {
       if (confirm("Deseja arquivar esta coluna?")) {
         await updateDoc(doc(db, "columns", colId), { archived: true });
       }
     };
 
-    // Ação: Adicionar Card
     window.addCard = async function (columnId) {
       const titleInput = document.getElementById(`title-${columnId}`);
       const descInput = document.getElementById(`desc-${columnId}`);
@@ -197,16 +213,14 @@
       const description = descInput.value.trim();
       const file = fileInput.files[0];
 
-      if (!title) return alert("Digite um título para a tarefa.");
+      if (!title) return alert("Digite um título.");
 
       let fileData = "";
       let fileType = "";
       let fileName = "";
 
       if (file) {
-        if (file.size > 800 * 1024) {
-          return alert("O arquivo é muito grande. Para esta versão sem servidor pago, anexe arquivos de até 800KB.");
-        }
+        if (file.size > 800 * 1024) return alert("Arquivo maior que 800KB.");
         fileData = await fileToBase64(file);
         fileType = file.type;
         fileName = file.name;
@@ -227,15 +241,8 @@
       fileInput.value = "";
     };
 
-    // Ação: Mover Card
-    window.moveCard = async function (cardId, newColumnId) {
-      if (!newColumnId) return;
-      await updateDoc(doc(db, "cards", cardId), { columnId: newColumnId });
-    };
-
-    // Ação: Excluir Card
     window.deleteCard = async function (cardId) {
-      if (confirm("Deseja excluir este card?")) {
+      if (confirm("Excluir este card?")) {
         await deleteDoc(doc(db, "cards", cardId));
       }
     };
@@ -250,7 +257,7 @@
   <header>
     <h1>Quadro Trello - Tempo Real</h1>
     <div class="add-column-bar">
-      <input type="text" id="new-column-title" placeholder="Nome da nova coluna...">
+      <input type="text" id="new-column-title" placeholder="Nova coluna...">
       <button onclick="addColumn()">+ Criar Coluna</button>
     </div>
   </header>
