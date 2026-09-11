@@ -3,48 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quadro Trello - Tempo Real</title>
+  <title>Trello Realtime Avançado</title>
   <style>
     * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; }
     body { background-color: #0079bf; color: #333; padding: 20px; }
-    h1 { color: white; margin-bottom: 20px; text-align: center; }
     
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white; }
+    h1 { font-size: 1.8em; }
+    
+    .add-column-bar { display: flex; gap: 10px; }
+    .add-column-bar input { padding: 8px; border-radius: 4px; border: none; outline: none; }
+    .add-column-bar button { background: #5aac44; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .add-column-bar button:hover { background: #519839; }
+
     /* Layout do Quadro */
-    .board { display: flex; gap: 20px; overflow-x: auto; align-items: flex-start; padding-bottom: 20px; }
-    .list { background: #ebecf0; border-radius: 8px; width: 320px; min-width: 320px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-    .list-title { font-weight: bold; margin-bottom: 12px; font-size: 1.1em; color: #172b4d; }
-    
+    .board { display: flex; gap: 20px; overflow-x: auto; align-items: flex-start; padding-bottom: 20px; min-height: 80vh; }
+    .list { background: #ebecf0; border-radius: 8px; width: 320px; min-width: 320px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); flex-shrink: 0; }
+    .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .list-title { font-weight: bold; font-size: 1.1em; color: #172b4d; }
+    .btn-archive-col { background: transparent; border: none; color: #6b778c; cursor: pointer; font-size: 0.85em; text-decoration: underline; }
+    .btn-archive-col:hover { color: #eb5a46; }
+
     /* Cards */
-    .card { background: white; border-radius: 5px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); position: relative; }
-    .card-title { font-weight: bold; margin-bottom: 6px; font-size: 1em; color: #172b4d; }
+    .cards-container { min-height: 20px; }
+    .card { background: white; border-radius: 5px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+    .card-title { font-weight: bold; margin-bottom: 6px; color: #172b4d; }
     .card-desc { font-size: 0.9em; color: #5e6c84; margin-bottom: 8px; white-space: pre-wrap; }
     
     /* Anexos */
     .card-attachment { margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; }
-    .card-attachment img { max-width: 100%; border-radius: 4px; margin-top: 5px; display: block; }
-    .card-attachment a { color: #0052cc; font-size: 0.85em; text-decoration: none; word-break: break-all; font-weight: bold; }
-    .card-attachment a:hover { text-decoration: underline; }
+    .card-attachment img { max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px; display: block; margin-top: 5px; }
+    .card-attachment a { color: #0052cc; font-size: 0.85em; text-decoration: underline; word-break: break-all; font-weight: bold; display: inline-block; margin-top: 4px; }
 
-    /* Ações */
-    .card-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
-    .btn-delete { background: #eb5a46; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 0.8em; font-weight: bold; }
+    /* Ações do Card */
+    .card-controls { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 5px; border-top: 1px solid #f4f5f7; padding-top: 8px; }
+    .card-controls select { padding: 4px; border-radius: 3px; border: 1px solid #ccc; font-size: 0.8em; background: #fff; }
+    .btn-delete { background: #eb5a46; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 0.8em; font-weight: bold; }
     .btn-delete:hover { background: #cf513d; }
 
-    /* Formulario */
+    /* Formulário */
     .add-card-form { margin-top: 12px; background: #fafbfc; padding: 10px; border-radius: 5px; border: 1px solid #dfe1e6; }
     .add-card-form input[type="text"], .add-card-form textarea { width: 100%; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.9em; }
-    .add-card-form textarea { resize: vertical; min-height: 50px; }
+    .add-card-form textarea { resize: vertical; min-height: 40px; }
     .add-card-form input[type="file"] { margin-bottom: 8px; font-size: 0.8em; width: 100%; }
-    .add-card-form button { background: #5aac44; color: white; border: none; padding: 8px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; width: 100%; font-size: 0.9em; }
-    .add-card-form button:hover { background: #519839; }
+    .add-card-form button { background: #0079bf; color: white; border: none; padding: 8px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; width: 100%; font-size: 0.9em; }
+    .add-card-form button:hover { background: #026aa7; }
   </style>
 
-  <!-- Firebase Web SDK (v10) -->
+  <!-- Firebase Web SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Configuração com as suas chaves do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAfGOE3i3eC8B39U8m0BmneXhb9wvszPvk",
       authDomain: "teste-trello-ad5b9.firebaseapp.com",
@@ -53,177 +63,199 @@
       appId: "1:979883215897:web:0ee397e2084eb92db8ae88"
     };
 
-    // Inicializa o Firebase e Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const cardsCollection = collection(db, "cards");
+    
+    const columnsColl = collection(db, "columns");
+    const cardsColl = collection(db, "cards");
 
-    // Escuta alterações em tempo real do banco de dados
-    onSnapshot(cardsCollection, (snapshot) => {
-      document.getElementById("cards-todo").innerHTML = "";
-      document.getElementById("cards-doing").innerHTML = "";
-      document.getElementById("cards-done").innerHTML = "";
+    let currentColumns = [];
+    let currentCards = [];
 
-      snapshot.forEach((docSnap) => {
-        renderCard(docSnap.id, docSnap.data());
+    // Escuta Colunas em Tempo Real
+    const qColumns = query(columnsColl, orderBy("createdAt", "asc"));
+    onSnapshot(qColumns, (snapshot) => {
+      currentColumns = [];
+      snapshot.forEach(docSnap => {
+        const col = docSnap.data();
+        if (!col.archived) {
+          currentColumns.push({ id: docSnap.id, ...col });
+        }
       });
+      renderBoard();
     });
 
-    // Renderiza um card individual
-    function renderCard(id, card) {
-      const container = document.getElementById(`cards-${card.status}`);
-      if (!container) return;
+    // Escuta Cards em Tempo Real
+    onSnapshot(cardsColl, (snapshot) => {
+      currentCards = [];
+      snapshot.forEach(docSnap => {
+        currentCards.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      renderBoard();
+    });
 
-      const cardEl = document.createElement("div");
-      cardEl.className = "card";
-      
-      let attachmentHTML = "";
-      if (card.fileUrl) {
-        if (card.fileType && card.fileType.startsWith("image/")) {
-          attachmentHTML = `<div class="card-attachment"><img src="${card.fileUrl}" alt="Anexo Imagem"></div>`;
-        } else {
-          attachmentHTML = `<div class="card-attachment"><a href="${card.fileUrl}" target="_blank">📄 Abrir Anexo / Documento</a></div>`;
-        }
-      }
-
-      cardEl.innerHTML = `
-        <div class="card-title">${escapeHtml(card.title)}</div>
-        ${card.description ? `<div class="card-desc">${escapeHtml(card.description)}</div>` : ''}
-        ${attachmentHTML}
-        <div class="card-actions">
-          <button class="btn-delete" onclick="window.deleteCard('${id}')">Excluir</button>
-        </div>
-      `;
-
-      container.appendChild(cardEl);
+    // Converter arquivos para Base64 (Armazenamento direto no Firestore)
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
     }
 
-    // Upload gratuito usando Imgur API
-    async function uploadFile(file) {
-      const formData = new FormData();
-      formData.append("image", file);
-      
-      try {
-        const response = await fetch("https://api.imgur.com/3/image", {
-          method: "POST",
-          headers: { Authorization: "Client-ID c3230bdf3108c5c" },
-          body: formData
-        });
-        const data = await response.json();
-        return data.data ? data.data.link : null;
-      } catch (err) {
-        console.error("Erro no upload do arquivo:", err);
-        return null;
-      }
+    // Renderizar o Quadro Inteiro
+    function renderBoard() {
+      const boardEl = document.getElementById("board");
+      boardEl.innerHTML = "";
+
+      currentColumns.forEach(column => {
+        const colEl = document.createElement("div");
+        colEl.className = "list";
+
+        // Filtra cards da coluna
+        const colCards = currentCards.filter(c => c.columnId === column.id);
+
+        let cardsHTML = colCards.map(card => {
+          let attachmentHTML = "";
+          if (card.fileData) {
+            if (card.fileType && card.fileType.startsWith("image/")) {
+              attachmentHTML = `<div class="card-attachment"><img src="${card.fileData}" alt="Imagem"></div>`;
+            } else {
+              attachmentHTML = `<div class="card-attachment"><a href="${card.fileData}" download="${card.fileName || 'anexo'}" target="_blank">📄 ${escapeHtml(card.fileName || 'Baixar Arquivo/PDF')}</a></div>`;
+            }
+          }
+
+          // Seletor para mover de coluna
+          let moveOptions = currentColumns.map(c => 
+            `<option value="${c.id}" ${c.id === column.id ? 'selected disabled' : ''}>Mover para: ${escapeHtml(c.title)}</option>`
+          ).join('');
+
+          return `
+            <div class="card">
+              <div class="card-title">${escapeHtml(card.title)}</div>
+              ${card.description ? `<div class="card-desc">${escapeHtml(card.description)}</div>` : ''}
+              ${attachmentHTML}
+              <div class="card-controls">
+                <select onchange="window.moveCard('${card.id}', this.value)">
+                  <option value="" disabled selected>Mover para...</option>
+                  ${moveOptions}
+                </select>
+                <button class="btn-delete" onclick="window.deleteCard('${card.id}')">Excluir</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        colEl.innerHTML = `
+          <div class="list-header">
+            <span class="list-title">${escapeHtml(column.title)}</span>
+            <button class="btn-archive-col" onclick="window.archiveColumn('${column.id}')">Arquivar</button>
+          </div>
+          <div class="cards-container">${cardsHTML}</div>
+          <div class="add-card-form">
+            <input type="text" id="title-${column.id}" placeholder="Título da tarefa...">
+            <textarea id="desc-${column.id}" placeholder="Descrição (opcional)..."></textarea>
+            <input type="file" id="file-${column.id}">
+            <button onclick="window.addCard('${column.id}')">+ Adicionar Card</button>
+          </div>
+        `;
+
+        boardEl.appendChild(colEl);
+      });
     }
 
-    // Adiciona um novo card no Firestore
-    window.addCard = async function (status) {
-      const titleInput = document.getElementById(`title-${status}`);
-      const descInput = document.getElementById(`desc-${status}`);
-      const fileInput = document.getElementById(`file-${status}`);
-      const btn = document.querySelector(`#form-${status} button`);
+    // Ação: Criar Coluna
+    window.addColumn = async function () {
+      const input = document.getElementById("new-column-title");
+      const title = input.value.trim();
+      if (!title) return alert("Digite o nome da coluna.");
+
+      await addDoc(columnsColl, {
+        title: title,
+        archived: false,
+        createdAt: new Date()
+      });
+
+      input.value = "";
+    };
+
+    // Ação: Arquivar Coluna
+    window.archiveColumn = async function (colId) {
+      if (confirm("Deseja arquivar esta coluna?")) {
+        await updateDoc(doc(db, "columns", colId), { archived: true });
+      }
+    };
+
+    // Ação: Adicionar Card
+    window.addCard = async function (columnId) {
+      const titleInput = document.getElementById(`title-${columnId}`);
+      const descInput = document.getElementById(`desc-${columnId}`);
+      const fileInput = document.getElementById(`file-${columnId}`);
 
       const title = titleInput.value.trim();
       const description = descInput.value.trim();
       const file = fileInput.files[0];
 
-      if (!title) {
-        alert("Por favor, digite um título.");
-        return;
-      }
+      if (!title) return alert("Digite um título para a tarefa.");
 
-      btn.disabled = true;
-      btn.innerText = "Salvando...";
-
-      let fileUrl = "";
+      let fileData = "";
       let fileType = "";
+      let fileName = "";
 
       if (file) {
-        fileUrl = await uploadFile(file);
+        if (file.size > 800 * 1024) {
+          return alert("O arquivo é muito grande. Para esta versão sem servidor pago, anexe arquivos de até 800KB.");
+        }
+        fileData = await fileToBase64(file);
         fileType = file.type;
+        fileName = file.name;
       }
 
-      try {
-        await addDoc(cardsCollection, {
-          title,
-          description,
-          status,
-          fileUrl,
-          fileType,
-          createdAt: new Date()
-        });
+      await addDoc(cardsColl, {
+        title,
+        description,
+        columnId,
+        fileData,
+        fileType,
+        fileName,
+        createdAt: new Date()
+      });
 
-        titleInput.value = "";
-        descInput.value = "";
-        fileInput.value = "";
-      } catch (err) {
-        alert("Erro ao salvar o card. Verifique a configuração das Regras do Firestore.");
-        console.error(err);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "+ Adicionar Card";
-      }
+      titleInput.value = "";
+      descInput.value = "";
+      fileInput.value = "";
     };
 
-    // Remove um card do Firestore
-    window.deleteCard = async function (id) {
-      if (confirm("Deseja realmente excluir este card?")) {
-        await deleteDoc(doc(db, "cards", id));
+    // Ação: Mover Card
+    window.moveCard = async function (cardId, newColumnId) {
+      if (!newColumnId) return;
+      await updateDoc(doc(db, "cards", cardId), { columnId: newColumnId });
+    };
+
+    // Ação: Excluir Card
+    window.deleteCard = async function (cardId) {
+      if (confirm("Deseja excluir este card?")) {
+        await deleteDoc(doc(db, "cards", cardId));
       }
     };
 
     function escapeHtml(text) {
-      return text.replace(/[&<"']/g, m => ({ '&': '&amp;', '<': '&lt;', '"': '&quot;', "'": '&#039;' }[m]));
+      return text ? text.replace(/[&<"']/g, m => ({ '&': '&amp;', '<': '&lt;', '"': '&quot;', "'": '&#039;' }[m])) : '';
     }
   </script>
 </head>
 <body>
 
-  <h1>Quadro Trello - Sincronizado em Tempo Real</h1>
-
-  <div class="board">
-    
-    <!-- Coluna: A Fazer -->
-    <div class="list">
-      <div class="list-title">📌 A Fazer</div>
-      <div id="cards-todo"></div>
-      
-      <div class="add-card-form" id="form-todo">
-        <input type="text" id="title-todo" placeholder="Título da tarefa...">
-        <textarea id="desc-todo" placeholder="Descrição (opcional)..."></textarea>
-        <input type="file" id="file-todo" accept="image/*,application/pdf">
-        <button onclick="addCard('todo')">+ Adicionar Card</button>
-      </div>
+  <header>
+    <h1>Quadro Trello - Tempo Real</h1>
+    <div class="add-column-bar">
+      <input type="text" id="new-column-title" placeholder="Nome da nova coluna...">
+      <button onclick="addColumn()">+ Criar Coluna</button>
     </div>
+  </header>
 
-    <!-- Coluna: Em Andamento -->
-    <div class="list">
-      <div class="list-title">⏳ Em Andamento</div>
-      <div id="cards-doing"></div>
-      
-      <div class="add-card-form" id="form-doing">
-        <input type="text" id="title-doing" placeholder="Título da tarefa...">
-        <textarea id="desc-doing" placeholder="Descrição (opcional)..."></textarea>
-        <input type="file" id="file-doing" accept="image/*,application/pdf">
-        <button onclick="addCard('doing')">+ Adicionar Card</button>
-      </div>
-    </div>
-
-    <!-- Coluna: Concluído -->
-    <div class="list">
-      <div class="list-title">✅ Concluído</div>
-      <div id="cards-done"></div>
-      
-      <div class="add-card-form" id="form-done">
-        <input type="text" id="title-done" placeholder="Título da tarefa...">
-        <textarea id="desc-done" placeholder="Descrição (opcional)..."></textarea>
-        <input type="file" id="file-done" accept="image/*,application/pdf">
-        <button onclick="addCard('done')">+ Adicionar Card</button>
-      </div>
-    </div>
-
-  </div>
+  <div class="board" id="board"></div>
 
 </body>
 </html>
