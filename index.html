@@ -16,25 +16,29 @@
     .add-column-bar button { background: #5aac44; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
     .add-column-bar button:hover { background: #519839; }
 
-    /* Layout do Quadro e Colunas Mais Estreitas */
+    /* Layout do Quadro */
     .board { display: flex; gap: 12px; overflow-x: auto; align-items: flex-start; padding-bottom: 15px; min-height: 85vh; }
-    .list { background: #ebecf0; border-radius: 6px; width: 240px; min-width: 240px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); flex-shrink: 0; }
+    .list { background: #ebecf0; border-radius: 6px; width: 240px; min-width: 240px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); flex-shrink: 0; transition: opacity 0.2s; }
+    
+    /* Estilo de Coluna Arquivada */
+    .list.archived-list { background: #dcdfe4; opacity: 0.7; border: 1px dashed #a5adba; }
+    
     .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px; }
     .list-title { font-weight: bold; font-size: 0.95em; color: #172b4d; }
     .btn-archive-col { background: transparent; border: none; color: #6b778c; cursor: pointer; font-size: 0.75em; text-decoration: underline; }
-    .btn-archive-col:hover { color: #eb5a46; }
+    .btn-archive-col:hover { color: #0052cc; }
 
     /* Container de Soltar Cards */
     .cards-container { min-height: 40px; padding-bottom: 5px; }
     .cards-container.drag-over { background: rgba(9, 30, 66, 0.08); border-radius: 4px; }
 
-    /* Cartões Menores e Compactos */
+    /* Cartões */
     .card { background: white; border-radius: 4px; padding: 8px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); cursor: grab; position: relative; }
     .card:active { cursor: grabbing; opacity: 0.6; }
     .card-title { font-weight: bold; margin-bottom: 4px; color: #172b4d; font-size: 0.88em; }
     .card-desc { font-size: 0.8em; color: #5e6c84; margin-bottom: 6px; white-space: pre-wrap; line-height: 1.2; }
     
-    /* Anexos Compactos */
+    /* Anexos */
     .card-attachment { margin-top: 6px; border-top: 1px solid #eee; padding-top: 4px; }
     .card-attachment img { max-width: 100%; max-height: 120px; object-fit: cover; border-radius: 3px; display: block; margin-top: 4px; }
     .card-attachment a { color: #0052cc; font-size: 0.75em; text-decoration: underline; word-break: break-all; font-weight: bold; display: inline-block; }
@@ -44,7 +48,7 @@
     .btn-delete { background: #eb5a46; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 0.7em; font-weight: bold; }
     .btn-delete:hover { background: #cf513d; }
 
-    /* Formulário Mais Compacto */
+    /* Formulário */
     .add-card-form { margin-top: 8px; background: #fafbfc; padding: 6px; border-radius: 4px; border: 1px solid #dfe1e6; }
     .add-card-form input[type="text"], .add-card-form textarea { width: 100%; margin-bottom: 6px; padding: 5px; border: 1px solid #ccc; border-radius: 3px; font-size: 0.8em; }
     .add-card-form textarea { resize: vertical; min-height: 32px; }
@@ -80,8 +84,7 @@
     onSnapshot(qColumns, (snapshot) => {
       currentColumns = [];
       snapshot.forEach(docSnap => {
-        const col = docSnap.data();
-        if (!col.archived) currentColumns.push({ id: docSnap.id, ...col });
+        currentColumns.push({ id: docSnap.id, ...docSnap.data() });
       });
       renderBoard();
     });
@@ -104,14 +107,14 @@
       });
     }
 
-    // Renderiza o Quadro com Drag & Drop
+    // Renderiza o Quadro
     function renderBoard() {
       const boardEl = document.getElementById("board");
       boardEl.innerHTML = "";
 
       currentColumns.forEach(column => {
         const colEl = document.createElement("div");
-        colEl.className = "list";
+        colEl.className = `list ${column.archived ? 'archived-list' : ''}`;
 
         const colCards = currentCards.filter(c => c.columnId === column.id);
 
@@ -137,10 +140,13 @@
           `;
         }).join('');
 
+        const archiveActionText = column.archived ? "Desarquivar" : "Arquivar";
+        const titleBadge = column.archived ? " (Arquivada)" : "";
+
         colEl.innerHTML = `
           <div class="list-header">
-            <span class="list-title">${escapeHtml(column.title)}</span>
-            <button class="btn-archive-col" onclick="window.archiveColumn('${column.id}')">Arquivar</button>
+            <span class="list-title">${escapeHtml(column.title)}${titleBadge}</span>
+            <button class="btn-archive-col" onclick="window.toggleArchiveColumn('${column.id}', ${!column.archived})">${archiveActionText}</button>
           </div>
           <div class="cards-container" 
                ondragover="window.onDragOver(event)" 
@@ -160,7 +166,7 @@
       });
     }
 
-    // Funções de Arrastar e Soltar (Drag and Drop)
+    // Drag & Drop
     window.onDragStart = function (e, cardId) {
       e.dataTransfer.setData("text/plain", cardId);
     };
@@ -183,7 +189,7 @@
       }
     };
 
-    // Ações
+    // Ações das Colunas
     window.addColumn = async function () {
       const input = document.getElementById("new-column-title");
       const title = input.value.trim();
@@ -198,10 +204,8 @@
       input.value = "";
     };
 
-    window.archiveColumn = async function (colId) {
-      if (confirm("Deseja arquivar esta coluna?")) {
-        await updateDoc(doc(db, "columns", colId), { archived: true });
-      }
+    window.toggleArchiveColumn = async function (colId, archiveState) {
+      await updateDoc(doc(db, "columns", colId), { archived: archiveState });
     };
 
     window.addCard = async function (columnId) {
